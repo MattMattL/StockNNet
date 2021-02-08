@@ -1,29 +1,12 @@
 package stocktest;
 
-import stocktest.companies.Apple;
-import stocktest.companies.CompanyBase;
-import stocktest.neuralnet.NNetTest;
-import yahoofinance.Stock;
-import yahoofinance.YahooFinance;
-import yahoofinance.histquotes.HistoricalQuote;
-import yahoofinance.histquotes.Interval;
-
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
 
 class Main
 {
 	public static void main(String[] args) throws IOException
 	{
-//		NNetTest nnet = new NNetTest();
-//		nnet.test();
-
-		CompanyBase apple = new CompanyBase("AAPL");
-		CompanyBase google = new CompanyBase("GOOG");
-
-//		apple.trainNNet();
-		google.trainNNet();
+		Test.test();
 	}
 
 	/*

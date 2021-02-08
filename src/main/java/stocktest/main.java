@@ -1,5 +1,7 @@
 package stocktest;
 
+import stocktest.debug.Test;
+
 import java.io.IOException;
 
 class Main

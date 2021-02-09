@@ -67,8 +67,8 @@ public class CompanyBase
 
 					double localErrorSum = 0;
 
-					for(int l=0; l<localError.length; l++)
-						localErrorSum += localError[l];
+					for(double v : localError)
+						localErrorSum += v;
 
 					if(localErrorSum < minError)
 					{
@@ -98,7 +98,7 @@ public class CompanyBase
 		this.setNNetProperties(bestDepth, bestMonths, bestDays);
 	}
 
-	public void setNNetProperties(int netDepth, int prevMonths, int batchDays) throws IOException
+	public void setNNetProperties(int netDepth, int prevMonths, int batchDays)
 	{
 		this.isInitialised = true;
 
@@ -107,7 +107,7 @@ public class CompanyBase
 		this.deepNNet = new DeepNNetBase(4 * batchDays, netDepth, 8);
 	}
 
-	public double[] trainNNet() throws IOException
+	public double[] trainNNet()
 	{
 		double sumErrorSquared[] = {0, 0, 0, 0};
 
@@ -197,16 +197,16 @@ public class CompanyBase
 		int iNNet = 0;
 		OneDayData unitData = sampleData.get(0).shallowCopy();
 
-		for(int i=0; i<sampleData.size(); i++)
+		for(OneDayData sampleDatum : sampleData)
 		{
-			sampleData.get(i).scaleDown(unitData);
+			sampleDatum.scaleDown(unitData);
 
-			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getOpen();
-			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getClose();
-			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getHigh();
-			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getLow();
+			this.deepNNet.vecIn[iNNet++] = sampleDatum.getOpen();
+			this.deepNNet.vecIn[iNNet++] = sampleDatum.getClose();
+			this.deepNNet.vecIn[iNNet++] = sampleDatum.getHigh();
+			this.deepNNet.vecIn[iNNet++] = sampleDatum.getLow();
 
-			sampleData.get(i).scaleUp(unitData);
+			sampleDatum.scaleUp(unitData);
 		}
 
 		// process the result and return

@@ -40,6 +40,8 @@ public class OneDayData
 	{
 		OneDayData newData = new OneDayData();
 
+		newData.setDate(this.getDate());
+
 		newData.setOpen(this.getOpen());
 		newData.setClose(this.getClose());
 		newData.setHigh(this.getHigh());

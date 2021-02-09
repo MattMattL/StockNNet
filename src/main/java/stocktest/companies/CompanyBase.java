@@ -89,6 +89,8 @@ public class CompanyBase
 
 	private void printResult(OneDayData actual, OneDayData estimate)
 	{
+		System.out.printf("[%s]\n", actual.getDate());
+
 		System.out.printf("Open  = %6.2f (%5.2f)", estimate.getOpen(), actual.getOpen());
 		System.out.printf("  (%5.1f%% off)\n", errorRate(actual.getOpen(), estimate.getOpen()));
 

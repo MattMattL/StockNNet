@@ -2,11 +2,14 @@ package stocktest.data;
 
 import yahoofinance.histquotes.HistoricalQuote;
 
+import java.text.SimpleDateFormat;
+
 public class OneDayData
 {
 	private int year;
 	private int month;
 	private int day;
+	private String date;
 
 	private double open;
 	private double close;
@@ -18,14 +21,17 @@ public class OneDayData
 
 	}
 
-	public static OneDayData setData(HistoricalQuote data)
+	public static OneDayData setData(HistoricalQuote dataIn)
 	{
 		OneDayData newData = new OneDayData();
 
-		newData.setOpen(data.getOpen().doubleValue());
-		newData.setClose(data.getClose().doubleValue());
-		newData.setHigh(data.getHigh().doubleValue());
-		newData.setLow(data.getLow().doubleValue());
+		SimpleDateFormat formatted = new SimpleDateFormat("yyyy.MM.dd");
+		newData.setDate(formatted.format(dataIn.getDate().getTime()));
+
+		newData.setOpen(dataIn.getOpen().doubleValue());
+		newData.setClose(dataIn.getClose().doubleValue());
+		newData.setHigh(dataIn.getHigh().doubleValue());
+		newData.setLow(dataIn.getLow().doubleValue());
 
 		return newData;
 	}
@@ -68,6 +74,11 @@ public class OneDayData
 
 	/* Setters */
 
+	public void setDate(String date)
+	{
+		this.date = date;
+	}
+
 	public void setOpen(double value)
 	{
 		this.open = value;
@@ -89,6 +100,11 @@ public class OneDayData
 	}
 
 	/* Getters */
+
+	public String getDate()
+	{
+		return date;
+	}
 
 	public double getOpen()
 	{

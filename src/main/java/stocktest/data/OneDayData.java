@@ -58,22 +58,6 @@ public class OneDayData
 		this.low *= unitData.getLow();
 	}
 
-	public void scaleDown(double fOpen, double fClose, double fHigh, double fLow)
-	{
-		this.open /= fOpen;
-		this.close /= fClose;
-		this.high /= fHigh;
-		this.low /= fLow;
-	}
-
-	public void scaleUp(double fOpen, double fClose, double fHigh, double fLow)
-	{
-		this.open *= fOpen;
-		this.close *= fClose;
-		this.high *= fHigh;
-		this.low *= fLow;
-	}
-
 	/* Setters */
 
 	public void setOpen(double value)

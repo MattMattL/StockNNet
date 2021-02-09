@@ -22,15 +22,20 @@ public class CompanyBase
 	private int netOut;
 	private DeepNNetBase deepNNet;
 
-	private boolean isNNetInitialised;
-	private int numTrainingBatch;
-	private int numLoadingMonths;
+	private boolean isInitialised;
+	private int batchDays;
+	private int totalMonths;
 
 	public CompanyBase(String ticker) throws IOException
 	{
 		this.ticker = ticker.toUpperCase();
 		this.stock = YahooFinance.get(this.ticker);
-		this.isNNetInitialised = false;
+		this.isInitialised = false;
+
+		Calendar from = Calendar.getInstance();
+		Calendar to = Calendar.getInstance();
+		from.add(Calendar.MONTH, -48);
+		this.dailyData = new DailyData(from, to, this.stock);
 	}
 
 	public Stock getStock()
@@ -40,13 +45,13 @@ public class CompanyBase
 
 	public void calibrateNNet() throws IOException
 	{
-		this.isNNetInitialised = true;
+		this.isInitialised = true;
 
 		double localError[];
 
-		int presetDepth[] = {3, 4, 5, 6, 10};
-		int presetMonths[] = {6, 12, 24, 36};
-		int presetDays[] = {10, 20, 30, 50, 100};
+		int presetDepth[] = {2, 3, 4, 5, 6, 10};
+		int presetMonths[] = {3, 4, 5, 6, 7, 8};
+		int presetDays[] = {10, 15, 20, 25, 30};
 
 		int bestDepth = 0, bestMonths = 0, bestDays = 0; // dataset with least error rate
 		double minError = Double.MAX_VALUE;
@@ -75,11 +80,11 @@ public class CompanyBase
 					}
 
 					System.out.printf("(%d, %d, %d)\n", d, m, b);
-					System.out.printf("open  = %8.4f\n", localError[0]);
-					System.out.printf("close = %8.4f\n", localError[1]);
-					System.out.printf("high  = %8.4f\n", localError[2]);
-					System.out.printf("low   = %8.4f\n", localError[3]);
-					System.out.printf("error = %8.4f\n\n", localErrorSum);
+					System.out.printf("open  = %8f\n", localError[0]);
+					System.out.printf("close = %8f\n", localError[1]);
+					System.out.printf("high  = %8f\n", localError[2]);
+					System.out.printf("low   = %8f\n", localError[3]);
+					System.out.printf("error = %8f\n\n", localErrorSum);
 				}
 			}
 		}
@@ -89,45 +94,42 @@ public class CompanyBase
 		System.out.printf("month = %d\n", bestMonths);
 		System.out.printf("batch = %d\n", bestDays);
 		System.out.printf("error = %f\n\n", minError);
+
+		this.setNNetProperties(bestDepth, bestMonths, bestDays);
 	}
 
 	public void setNNetProperties(int netDepth, int prevMonths, int batchDays) throws IOException
 	{
-		this.isNNetInitialised = true;
+		this.isInitialised = true;
 
-		this.numLoadingMonths = prevMonths;
-		this.numTrainingBatch = batchDays;
+		this.totalMonths = prevMonths;
+		this.batchDays = batchDays;
 		this.deepNNet = new DeepNNetBase(4 * batchDays, netDepth, 8);
-
-		Calendar from = Calendar.getInstance();
-		Calendar to = Calendar.getInstance();
-		from.add(Calendar.MONTH, -this.numLoadingMonths);
-		this.dailyData = new DailyData(from, to, this.stock);
 	}
 
 	public double[] trainNNet() throws IOException
 	{
 		double sumErrorSquared[] = {0, 0, 0, 0};
 
-		if(!this.isNNetInitialised)
+		if(!this.isInitialised)
 		{
 			System.out.printf("[Error] <CompanyBase#trainNNet> network not initialised\n");
 			return sumErrorSquared;
 		}
 
-		for(int i=0; i<(this.dailyData.size() - this.numTrainingBatch - 1); i++)
+		for(int i=(this.dailyData.size() - 22 * this.totalMonths); i<(this.dailyData.size() - this.batchDays - 1); i++)
 		{
 			// set input values
 			List<OneDayData> sampleDays = new ArrayList<>();
-			OneDayData nextDayData = this.dailyData.getDay(i + this.numTrainingBatch + 1);
+			OneDayData nextDayData = this.dailyData.getDay(i + this.batchDays + 1);
 
-			for(int j=0; j<this.numTrainingBatch; j++)
+			for(int j=0; j<this.batchDays; j++)
 				sampleDays.add(this.dailyData.getDay(i + j));
 
 			// get neural network output
 			OneDayData prediction = trainLocalData(sampleDays);
 
-			if(this.dailyData.size() - this.numTrainingBatch - 1 - i < 25)
+			if(this.dailyData.size() - this.batchDays - 1 - i < 25)
 				this.printResult(nextDayData, prediction);
 
 			// calculate error
@@ -156,7 +158,7 @@ public class CompanyBase
 		}
 
 		for(int i=0; i<sumErrorSquared.length; i++)
-			sumErrorSquared[i] /= (this.dailyData.size() - this.numTrainingBatch);
+			sumErrorSquared[i] /= (this.dailyData.size() - this.batchDays);
 
 		return sumErrorSquared;
 	}
@@ -226,13 +228,13 @@ public class CompanyBase
 	{
 		Calendar from = Calendar.getInstance();
 		Calendar to = Calendar.getInstance();
-		from.add(Calendar.DATE, -2 * this.numTrainingBatch);
+		from.add(Calendar.DATE, -2 * this.batchDays);
 
 		DailyData dailyData = new DailyData(from, to, this.stock);
 
 		List<OneDayData> sampleDays = new ArrayList<>();
 
-		for(int i=dailyData.size() - this.numTrainingBatch; i<dailyData.size(); i++)
+		for(int i = dailyData.size() - this.batchDays; i<dailyData.size(); i++)
 			sampleDays.add(dailyData.getDay(i));
 
 		return trainLocalData(sampleDays);

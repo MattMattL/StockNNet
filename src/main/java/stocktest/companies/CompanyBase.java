@@ -21,11 +21,13 @@ public class CompanyBase
 	private int netOut;
 	private DeepNNetBase deepNNet;
 
+	private int numTrainingBatch;
+	private int numLoadingMonths;
+
 	public CompanyBase(String ticker) throws IOException
 	{
 		this.ticker = ticker.toUpperCase();
 		this.stock = YahooFinance.get(this.ticker);
-		this.deepNNet = new DeepNNetBase(100, 5, 8);
 	}
 
 	public Stock getStock()
@@ -33,107 +35,105 @@ public class CompanyBase
 		return this.stock;
 	}
 
-	public void trainNNet() throws IOException
+	public void calibrateNNet()
 	{
+
+	}
+
+	public void trainNNet(int loadingMonths, int batchDays) throws IOException
+	{
+		this.numLoadingMonths = loadingMonths;
+		this.numTrainingBatch= batchDays;
+		this.deepNNet = new DeepNNetBase(4 * this.numTrainingBatch, 4, 8);
+
 		Calendar from = Calendar.getInstance();
 		Calendar to = Calendar.getInstance();
-		from.add(Calendar.MONTH, -5);
+		from.add(Calendar.MONTH, -this.numLoadingMonths);
 
-		DailyData dailyData = new DailyData(from, to, stock);
+		DailyData dailyData = new DailyData(from, to, this.stock);
 
-		int numSampleDays = 25;
-
-		for(int i=0; i<dailyData.size() - numSampleDays - 1; i++)
+		for(int i=0; i<(dailyData.size() - this.numTrainingBatch - 1); i++)
 		{
 			// set input values
 			List<OneDayData> sampleDays = new ArrayList<>();
-			OneDayData nextDayData = dailyData.getDay(i + numSampleDays + 1);
+			OneDayData nextDayData = dailyData.getDay(i + this.numTrainingBatch + 1);
 
-			for(int j=0; j<numSampleDays; j++)
+			for(int j=0; j<this.numTrainingBatch; j++)
 				sampleDays.add(dailyData.getDay(i + j));
 
 			// get neural network output
 			OneDayData prediction = trainLocalData(sampleDays);
 
-			if(dailyData.size() - numSampleDays - 1 - i < 50)
-			{
-				System.out.printf("Open  = %6.2f (%6.2f)", prediction.getOpen(), nextDayData.getOpen());
-				System.out.printf("  (%4.0f%% off)\n", errorRate(nextDayData.getOpen(), prediction.getOpen()));
-
-				System.out.printf("Close = %6.2f (%6.2f)", prediction.getClose(), nextDayData.getClose());
-				System.out.printf("  (%4.0f%% off)\n", errorRate(nextDayData.getClose(), prediction.getClose()));
-
-				System.out.printf("High  = %6.2f (%6.2f)", prediction.getHigh(), nextDayData.getHigh());
-				System.out.printf("  (%4.0f%% off)\n", errorRate(nextDayData.getHigh(), prediction.getHigh()));
-
-				System.out.printf("Low   = %6.2f (%6.2f)", prediction.getLow(), nextDayData.getLow());
-				System.out.printf("  (%4.0f%% off)\n", errorRate(nextDayData.getLow(), prediction.getLow()));
-				System.out.printf("\n");
-			}
+			if(dailyData.size() - this.numTrainingBatch - 1 - i < 25)
+				this.printResult(nextDayData, prediction);
 
 			// run backpropagation
 			int iNNet = 0;
 
-			this.deepNNet.vecDesired[iNNet++] = nextDayData.getOpen() / sampleDays.get(0).getOpen() / 2;
-			this.deepNNet.vecDesired[iNNet++] = nextDayData.getOpen() / sampleDays.get(0).getOpen() / 2;
-			this.deepNNet.vecDesired[iNNet++] = nextDayData.getClose() / sampleDays.get(0).getClose() / 2;
-			this.deepNNet.vecDesired[iNNet++] = nextDayData.getClose() / sampleDays.get(0).getClose() / 2;
-			this.deepNNet.vecDesired[iNNet++] = nextDayData.getHigh() / sampleDays.get(0).getHigh() / 2;
-			this.deepNNet.vecDesired[iNNet++] = nextDayData.getHigh() / sampleDays.get(0).getHigh() / 2;
-			this.deepNNet.vecDesired[iNNet++] = nextDayData.getLow() / sampleDays.get(0).getLow() / 2;
-			this.deepNNet.vecDesired[iNNet++] = nextDayData.getLow() / sampleDays.get(0).getLow() / 2;
+			nextDayData.scaleDown(sampleDays.get(0));
+
+			this.deepNNet.vecDesired[iNNet++] = nextDayData.getOpen() / 2;
+			this.deepNNet.vecDesired[iNNet++] = nextDayData.getOpen() / 2;
+			this.deepNNet.vecDesired[iNNet++] = nextDayData.getClose() / 2;
+			this.deepNNet.vecDesired[iNNet++] = nextDayData.getClose() / 2;
+			this.deepNNet.vecDesired[iNNet++] = nextDayData.getHigh() / 2;
+			this.deepNNet.vecDesired[iNNet++] = nextDayData.getHigh() / 2;
+			this.deepNNet.vecDesired[iNNet++] = nextDayData.getLow() / 2;
+			this.deepNNet.vecDesired[iNNet++] = nextDayData.getLow() / 2;
+
+			nextDayData.scaleUp(sampleDays.get(0));
 
 			this.deepNNet.nnRunBackprop();
 		}
-
-		from = Calendar.getInstance();
-		to = Calendar.getInstance();
-		from.add(Calendar.MONTH, -3);
-
-		dailyData = new DailyData(from, to, stock);
-
-		List<OneDayData> sampleDays = new ArrayList<>();
-
-		for(int i=dailyData.size() - 25; i<dailyData.size(); i++)
-			sampleDays.add(dailyData.getDay(i));
-
-		OneDayData prediction = trainLocalData(sampleDays);
-		System.out.printf("Open  = %f\n", prediction.getOpen());
-		System.out.printf("Close = %f\n", prediction.getClose());
-		System.out.printf("High  = %f\n", prediction.getHigh());
-		System.out.printf("Low   = %f\n", prediction.getLow());
 	}
 
-	private double errorRate(double estimate, double actual)
+	private void printResult(OneDayData actual, OneDayData estimate)
 	{
-		return 100 * (actual - estimate) / actual;
+		System.out.printf("Open  = %6.2f (%5.2f)", estimate.getOpen(), actual.getOpen());
+		System.out.printf("  (%5.1f%% off)\n", errorRate(actual.getOpen(), estimate.getOpen()));
+
+		System.out.printf("Close = %6.2f (%5.2f)", estimate.getClose(), actual.getClose());
+		System.out.printf("  (%5.1f%% off)\n", errorRate(actual.getClose(), estimate.getClose()));
+
+		System.out.printf("High  = %6.2f (%5.2f)", estimate.getHigh(), actual.getHigh());
+		System.out.printf("  (%5.1f%% off)\n", errorRate(actual.getHigh(), estimate.getHigh()));
+
+		System.out.printf("Low   = %6.2f (%5.2f)", estimate.getLow(), actual.getLow());
+		System.out.printf("  (%5.1f%% off)\n", errorRate(actual.getLow(), estimate.getLow()));
+
+		System.out.printf("\n");
 	}
 
+	private double errorRate(double actual, double estimate)
+	{
+		return 100 * (estimate - actual) / actual;
+	}
+
+	/*
+	*	Returns predicted result of one day stock data based on provided sample days.
+	* 	Same as getNextDayPrediction, otherwise.
+	*/
 	private OneDayData trainLocalData(List<OneDayData> sampleData)
 	{
 		// scale raw data and copy to input vector
 		int iNNet = 0;
 		OneDayData unitData = sampleData.get(0).shallowCopy();
 
-		double fOpen = sampleData.get(0).getOpen();
-		double fClose = sampleData.get(0).getClose();
-		double fHigh = sampleData.get(0).getHigh();
-		double fLow = sampleData.get(0).getLow();
-
 		for(int i=0; i<sampleData.size(); i++)
 		{
-//			sampleValues.get(i).scaleDown(fOpen, fClose, fHigh,fLow);
+			sampleData.get(i).scaleDown(unitData);
 
-			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getOpen() / fOpen;
-			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getClose() / fClose;
-			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getHigh() / fHigh;
-			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getLow() / fLow;
+			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getOpen();
+			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getClose();
+			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getHigh();
+			this.deepNNet.vecIn[iNNet++] = sampleData.get(i).getLow();
+
+			sampleData.get(i).scaleUp(unitData);
 		}
 
-		// calculate neural output
+		// process the result and return
 		this.deepNNet.nnRunFeedForward();
 
-		// process the result and return
 		OneDayData result = new OneDayData();
 
 		result.setOpen(this.deepNNet.vecOut[0] + this.deepNNet.vecOut[1]);
@@ -141,13 +141,24 @@ public class CompanyBase
 		result.setHigh(this.deepNNet.vecOut[4] + this.deepNNet.vecOut[5]);
 		result.setLow(this.deepNNet.vecOut[6] + this.deepNNet.vecOut[7]);
 
-		result.scaleUp(fOpen, fClose, fHigh,fLow);
+		result.scaleUp(unitData);
 
 		return result;
 	}
 
-	public OneDayData getNextDayPrediction(List<OneDayData> sampleData)
+	public OneDayData getNextDayPrediction() throws IOException
 	{
-		return null;
+		Calendar from = Calendar.getInstance();
+		Calendar to = Calendar.getInstance();
+		from.add(Calendar.DATE, -2 * this.numTrainingBatch);
+
+		DailyData dailyData = new DailyData(from, to, this.stock);
+
+		List<OneDayData> sampleDays = new ArrayList<>();
+
+		for(int i=dailyData.size() - this.numTrainingBatch; i<dailyData.size(); i++)
+			sampleDays.add(dailyData.getDay(i));
+
+		return trainLocalData(sampleDays);
 	}
 }

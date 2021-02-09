@@ -1,14 +1,19 @@
 package stocktest;
 
-import stocktest.debug.Test;
+import stocktest.debug.TestClass;
 
 import java.io.IOException;
 
-class Main
+public class StockTest
 {
 	public static void main(String[] args) throws IOException
 	{
-		Test.test();
+		runTest();
+	}
+
+	public static void runTest() throws IOException
+	{
+		TestClass.testCode();
 	}
 
 	/*

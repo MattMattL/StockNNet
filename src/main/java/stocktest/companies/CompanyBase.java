@@ -50,7 +50,7 @@ public class CompanyBase
 		double localError[];
 
 		int presetDepth[] = {2, 3, 4, 5, 6, 10};
-		int presetMonths[] = {3, 4, 5, 6, 7, 8};
+		int presetMonths[] = {3, 4, 5, 6, 7, 8, 12, 18};
 		int presetDays[] = {10, 15, 20, 25, 30};
 
 		int bestDepth = 0, bestMonths = 0, bestDays = 0; // dataset with least error rate
@@ -230,13 +230,14 @@ public class CompanyBase
 		Calendar to = Calendar.getInstance();
 		from.add(Calendar.DATE, -2 * this.batchDays);
 
-		DailyData dailyData = new DailyData(from, to, this.stock);
-
 		List<OneDayData> sampleDays = new ArrayList<>();
 
 		for(int i = dailyData.size() - this.batchDays; i<dailyData.size(); i++)
-			sampleDays.add(dailyData.getDay(i));
+			sampleDays.add(this.dailyData.getDay(i));
 
-		return trainLocalData(sampleDays);
+		OneDayData result = trainLocalData(sampleDays);
+		this.dailyData.addDay(result);
+
+		return result;
 	}
 }

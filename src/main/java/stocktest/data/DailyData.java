@@ -31,18 +31,15 @@ public class DailyData
 		return dailyData.get(index);
 	}
 
+	public void addDay(OneDayData data)
+	{
+		this.dailyData.add(data);
+	}
+
 	public int size()
 	{
 		return this.dailyData.size();
 	}
-
-//	public void setScaleFactor(double fOpen, double fClose, double fHigh, double fLow)
-//	{
-//		this.scaleFactorOpen = fOpen;
-//		this.scaleFactorClose = fClose;
-//		this.scaleFactorHigh = fHigh;
-//		this.scaleFactorLow = fLow;
-//	}
 
 	public void scaleDown(OneDayData unitData)
 	{

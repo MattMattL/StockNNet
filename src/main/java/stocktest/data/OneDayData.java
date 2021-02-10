@@ -72,6 +72,7 @@ public class OneDayData
 		System.out.printf("Close = %7.2f\n", this.close);
 		System.out.printf("High  = %7.2f\n", this.high);
 		System.out.printf("Low   = %7.2f\n", this.low);
+		System.out.printf("\n");
 	}
 
 	/* Setters */

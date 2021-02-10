@@ -18,7 +18,7 @@ public class OneDayData
 
 	public OneDayData()
 	{
-
+		this.date = "0000.00.00";
 	}
 
 	public static OneDayData setData(HistoricalQuote dataIn)

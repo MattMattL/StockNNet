@@ -2,6 +2,7 @@ package stocktest.companies;
 
 import stocktest.data.OneDayData;
 import stocktest.data.DailyData;
+import stocktest.debug.StockVariables;
 import stocktest.neuralnet.DeepNNetBase;
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
@@ -49,9 +50,9 @@ public class CompanyBase
 
 		double localError[];
 
-		int presetDepth[] = {2, 3, 4, 5, 6, 10};
-		int presetMonths[] = {3, 4, 5, 6, 7, 8, 12, 18};
-		int presetDays[] = {10, 15, 20, 25, 30};
+		int presetDepth[] = StockVariables.dataDepth;
+		int presetMonths[] = StockVariables.dataMonths;
+		int presetDays[] = StockVariables.dataDays;
 
 		int bestDepth = 0, bestMonths = 0, bestDays = 0; // dataset with least error rate
 		double minError = Double.MAX_VALUE;

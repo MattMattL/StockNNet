@@ -22,8 +22,8 @@ public class DailyData
 	{
 		List<HistoricalQuote> history = stock.getHistory(from, to, Interval.DAILY);
 
-		for(int i=0; i<history.size(); i++)
-			dailyData.add(OneDayData.setData(history.get(i)));
+		for(HistoricalQuote quote : history)
+			dailyData.add(OneDayData.setData(quote));
 	}
 
 	public OneDayData getDay(int index)

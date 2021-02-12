@@ -128,7 +128,7 @@ public class CompanyBase
 				sampleDays.add(this.dailyData.getDay(i + j));
 
 			// get neural network output
-			OneDayData prediction = trainLocalData(sampleDays);
+			OneDayData prediction = feedforwardLocalData(sampleDays);
 
 			if(this.dailyData.size() - this.batchDays - 1 - i < 25)
 				this.printResult(nextDayData, prediction);
@@ -189,10 +189,9 @@ public class CompanyBase
 	}
 
 	/*
-	*	Returns predicted result of one day stock data based on provided sample days.
-	* 	Same as getNextDayPrediction, otherwise.
+	*	Returns predicted result of one-day stock data for backpropagation.
 	*/
-	private OneDayData trainLocalData(List<OneDayData> sampleData)
+	private OneDayData feedforwardLocalData(List<OneDayData> sampleData)
 	{
 		// scale raw data and copy to input vector
 		int iNNet = 0;
@@ -225,6 +224,10 @@ public class CompanyBase
 		return result;
 	}
 
+	/*
+	*	Produces next-day prediction. This new data is added to the daily data list
+	*	and returned.
+	*/
 	public OneDayData getNextDayPrediction() throws IOException
 	{
 		Calendar from = Calendar.getInstance();
@@ -236,7 +239,7 @@ public class CompanyBase
 		for(int i = dailyData.size() - this.batchDays; i<dailyData.size(); i++)
 			sampleDays.add(this.dailyData.getDay(i));
 
-		OneDayData result = trainLocalData(sampleDays);
+		OneDayData result = feedforwardLocalData(sampleDays);
 		this.dailyData.addDay(result);
 
 		return result;

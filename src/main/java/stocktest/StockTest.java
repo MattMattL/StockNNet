@@ -13,6 +13,6 @@ public class StockTest
 
 	public static void runTest() throws IOException
 	{
-		TestClass.testCode();
+		TestClass.runTest();
 	}
 }

@@ -127,7 +127,7 @@ public class CompanyBase
 		{
 			// set input values
 			List<OneDayData> sampleDays = new ArrayList<>();
-			OneDayData nextDayData = this.dailyData.getDay(i + this.batchDays - 1);
+			OneDayData nextDayData = this.dailyData.getDay(i + this.batchDays);
 
 			for(int j=0; j<this.batchDays; j++)
 				sampleDays.add(this.dailyData.getDay(i + j));

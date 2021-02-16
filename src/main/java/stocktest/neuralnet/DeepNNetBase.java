@@ -53,7 +53,7 @@ public class DeepNNetBase
 		double deltaDepth = (double)(NET_OUT - NET_IN) / NET_DEPTH;
 
 		for(int l=1; l<NET_DEPTH; l++)
-			NET_WIDTH[l] = NET_IN + (int)(l * deltaDepth);
+			NET_WIDTH[l] = (NET_IN + (int)(l * deltaDepth)) / 2;
 	}
 
 	private void vectorInit()

@@ -69,7 +69,7 @@ public class GraphPanel extends JPanel
 		this.minResult = samples.getMinData();
 
 		this.xOffset = this.panelHeight - 10;
-		this.deltaX = this.panelWidth / samples.size();
+		this.deltaX = Math.max(1, this.panelWidth / results.size());
 		this.yScalar = 0.8 * this.panelHeight / (this.maxSample.getMax() - this.minSample.getMin());
 	}
 

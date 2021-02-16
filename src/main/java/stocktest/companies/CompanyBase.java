@@ -17,15 +17,14 @@ public class CompanyBase
 	private final String ticker;
 	private Stock stock;
 	private DailyData dailyData;
-
-	private int netIn;
-	private int netMid;
-	private int netOut;
 	private DeepNNetBase deepNNet;
 
 	private boolean isInitialised;
 	private int batchDays;
 	private int totalMonths;
+
+	private DailyData latestSamples;
+	private DailyData latestPredictions;
 
 	public CompanyBase(String ticker) throws IOException
 	{
@@ -37,6 +36,9 @@ public class CompanyBase
 		Calendar to = Calendar.getInstance();
 		from.add(Calendar.MONTH, -48);
 		this.dailyData = new DailyData(from, to, this.stock);
+
+		this.latestSamples = new DailyData();
+		this.latestPredictions = new DailyData();
 	}
 
 	public Stock getStock()
@@ -118,11 +120,14 @@ public class CompanyBase
 			return sumErrorSquared;
 		}
 
-		for(int i=(this.dailyData.size() - 22 * this.totalMonths); i<(this.dailyData.size() - this.batchDays - 1); i++)
+		this.latestSamples.clear();
+		this.latestPredictions.clear();
+
+		for(int i=(this.dailyData.size() - 22 * this.totalMonths); i<(this.dailyData.size() - this.batchDays); i++)
 		{
 			// set input values
 			List<OneDayData> sampleDays = new ArrayList<>();
-			OneDayData nextDayData = this.dailyData.getDay(i + this.batchDays + 1);
+			OneDayData nextDayData = this.dailyData.getDay(i + this.batchDays - 1);
 
 			for(int j=0; j<this.batchDays; j++)
 				sampleDays.add(this.dailyData.getDay(i + j));
@@ -132,6 +137,10 @@ public class CompanyBase
 
 			if(this.dailyData.size() - this.batchDays - 1 - i < 25)
 				this.printResult(nextDayData, prediction);
+
+			// log data
+			this.latestSamples.addDay(nextDayData);
+			this.latestPredictions.addDay(prediction);
 
 			// calculate error
 			sumErrorSquared[0] += Math.pow(errorRate(nextDayData.getOpen(), prediction.getOpen()), 2);
@@ -243,5 +252,15 @@ public class CompanyBase
 		this.dailyData.addDay(result);
 
 		return result;
+	}
+
+	public DailyData getTrainingSamples()
+	{
+		return this.latestSamples;
+	}
+
+	public DailyData getTrainingResult()
+	{
+		return this.latestPredictions;
 	}
 }

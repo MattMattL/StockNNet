@@ -21,6 +21,14 @@ public class OneDayData
 		this.date = "0000.00.00";
 	}
 
+	public OneDayData(double open, double close, double high, double low)
+	{
+		this.open = open;
+		this.close = close;
+		this.high = high;
+		this.low = low;
+	}
+
 	public static OneDayData setData(HistoricalQuote dataIn)
 	{
 		OneDayData newData = new OneDayData();
@@ -127,5 +135,15 @@ public class OneDayData
 	public double getLow()
 	{
 		return this.low;
+	}
+
+	public double getMin()
+	{
+		return Math.min(Math.min(this.open, this.close), Math.min(this.high, this.low));
+	}
+
+	public double getMax()
+	{
+		return Math.max(Math.max(this.open, this.close), Math.max(this.high, this.low));
 	}
 }

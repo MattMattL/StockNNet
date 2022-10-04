@@ -3,7 +3,7 @@
 ![Running the application](readme/example.PNG)
 
 ## Overview
-This is my mini project where I used neural networks and the yahoofinance library to generate short term predictions (5-10 days) of day-to-day stock data.
+This is my mini project where I used neural networks and yahoofinance-api to generate short term predictions (5-10 days) of day-to-day stock data.
 
 ## "Technical" Details
 * Input vector consists of opening, closing, min and max price of multiple days.

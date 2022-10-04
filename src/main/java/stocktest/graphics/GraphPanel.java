@@ -80,7 +80,7 @@ public class GraphPanel extends JPanel
 
 		for(int i=0; i<this.data.size(); i++)
 		{
-			g.drawLine(i * deltaX, 0, i * deltaX, 450);
+			g.drawLine(i * deltaX, 0, i * deltaX, this.panelHeight);
 		}
 	}
 
@@ -137,8 +137,6 @@ public class GraphPanel extends JPanel
 
 	private void drawGraph(Graphics g, Color lineColor)
 	{
-
-
 		// draw historic data
 		g.setColor(lineColor);
 

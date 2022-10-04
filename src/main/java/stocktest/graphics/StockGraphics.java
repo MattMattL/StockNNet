@@ -10,7 +10,7 @@ public class StockGraphics
 {
 	private final CompanyBase company;
 
-	private final int FRAME_HOR = 900;
+	private final int FRAME_HOR = 1200;
 	private final int FRAME_VER = 700;
 
 	public StockGraphics(CompanyBase company)
@@ -41,21 +41,34 @@ public class StockGraphics
 
 	public JFrame addGraphPanels(JFrame frame)
 	{
-		int width = 500;
+		int width = 600;
 		int height = 300;
 		int margin = 5;
 
-		int panelX[] = {margin, width + 2*margin, margin, width + 2*margin};
-		int panelY[] = {margin, margin, height + 2*margin, height + 2*margin};
+		int panelPos[][][] = new int[2][2][2];
 
-		GraphPanel graphOpen = new GraphPanel(this.company, panelX[0], panelY[0], width, height);
-		GraphPanel graphClose = new GraphPanel(this.company, panelX[1], panelY[1], width, height);
-		GraphPanel graphHigh = new GraphPanel(this.company, panelX[2], panelY[2], width, height);
-		GraphPanel graphLow = new GraphPanel(this.company, panelX[3], panelY[3], width, height);
+		for(int i=0; i<panelPos.length; i++)
+		{
+			for(int j=0; j<panelPos[0].length; j++)
+			{
+				panelPos[i][j][0] = (i + 1) * margin + i * width;
+				panelPos[i][j][1] =	(j + 1) * margin + j * height;
+			}
+		}
 
-		graphOpen.include(DataType.HISTORIC_OPEN, DataType.PREDICTED_OPEN);
+		GraphPanel graphOpen = new GraphPanel(this.company, panelPos[0][0][0], panelPos[0][0][1], width, height);
+		GraphPanel graphClose = new GraphPanel(this.company, panelPos[0][1][0], panelPos[0][1][1], width, height);
+		GraphPanel graphHigh = new GraphPanel(this.company, panelPos[1][0][0], panelPos[1][0][1], width, height);
+		GraphPanel graphLow = new GraphPanel(this.company, panelPos[1][1][0], panelPos[1][1][1], width, height);
+
+//		graphOpen.include(DataType.HISTORIC_OPEN, DataType.PREDICTED_OPEN, DataType.HISTORIC_CLOSE, DataType.PREDICTED_CLOSE);
+//		graphClose.include(DataType.HISTORIC_CLOSE, DataType.PREDICTED_CLOSE);
+//		graphHigh.include(DataType.HISTORIC_HIGH, DataType.PREDICTED_HIGH);
+//		graphLow.include(DataType.HISTORIC_LOW, DataType.PREDICTED_LOW);
+
+		graphOpen.include(DataType.HISTORIC_OPEN, DataType.PREDICTED_OPEN, DataType.HISTORIC_CLOSE, DataType.PREDICTED_CLOSE);
 		graphClose.include(DataType.HISTORIC_CLOSE, DataType.PREDICTED_CLOSE);
-		graphHigh.include(DataType.HISTORIC_HIGH, DataType.PREDICTED_HIGH);
+		graphHigh.include(DataType.HISTORIC_HIGH, DataType.PREDICTED_HIGH, DataType.HISTORIC_LOW, DataType.PREDICTED_LOW);
 		graphLow.include(DataType.HISTORIC_LOW, DataType.PREDICTED_LOW);
 
 		frame.getContentPane().add(graphOpen);

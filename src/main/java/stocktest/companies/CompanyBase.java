@@ -34,7 +34,7 @@ public class CompanyBase
 
 		Calendar from = Calendar.getInstance();
 		Calendar to = Calendar.getInstance();
-		from.add(Calendar.MONTH, -48);
+		from.add(Calendar.MONTH, -13);
 		this.dailyData = new DailyData(from, to, this.stock);
 
 		this.latestSamples = new DailyData();
@@ -250,6 +250,8 @@ public class CompanyBase
 
 		OneDayData result = feedforwardLocalData(sampleDays);
 		this.dailyData.addDay(result);
+
+		this.latestPredictions.addDay(result);
 
 		return result;
 	}

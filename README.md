@@ -7,7 +7,7 @@ This is my mini project where I used neural networks and the yahoofinance librar
 
 ## "Technical" Details
 * Input vector consists of opening, closing, min and max price of multiple days.
-* The calibration algorithm automatically picks the network depth and the input size that minimises total errors after testing a few different models.
+* The calibration algorithm automatically picks the network depth and the input size that minimise total errors after testing a few different models.
 * The period of data to train with is also automatically selected based on the total error.
 * Once trained, it shows 5-10 days of predicted future data for opening, closing, max and min values.
 

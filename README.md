@@ -13,5 +13,5 @@ A mini project where deep neural networks and yahoofinance-api are used to gener
 ## Why It Doesn't Work Well
 * It was just a quick test for fun.
 * Lack of well designed pre-processing layers.
-* Rapid overfitting during the training due to the simplicity in the neural architecture.
+* Rapid overfitting during the training due to the simplicity of the neural architecture.
 * Not enough input data (e.g., real-life news somehow processed into numerics, etc.?)
